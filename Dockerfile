@@ -1,23 +1,22 @@
-# Dockerfile otimizado para Render
-FROM n8nio/n8n:0.234.0
+# Dockerfile compatível com Render
+FROM node:18-alpine
 
-# Setup for Render
-USER root
-
-# Install dependencies
+# Install system dependencies
 RUN apk add --no-cache \
     curl \
+    git \
+    python3 \
+    make \
+    g++ \
     tini
 
-# Create proper directories
-RUN mkdir -p /home/node/.n8n && \
-    chown -R node:node /home/node
+# Install n8n globally
+RUN npm install -g n8n@0.234.0
 
-# Switch to node user
-USER node
-WORKDIR /home/node/.n8n
+# Create app directory
+WORKDIR /app
 
-# Environment variables
+# Environment variables for Render
 ENV N8N_HOST=0.0.0.0
 ENV N8N_PORT=${PORT:-5678}
 ENV N8N_PROTOCOL=https
@@ -29,8 +28,9 @@ ENV N8N_LOG_LEVEL=info
 ENV N8N_PUBLIC_API_DISABLED=false
 ENV N8N_DIAGNOSTICS_ENABLED=false
 ENV N8N_VERSION_NOTIFICATIONS_ENABLED=false
-ENV N8N_HIRING_BANNER_ENABLED=false
-ENV N8N_SECURE_COOKIE=false
+
+# Create n8n data directory
+RUN mkdir -p /app/.n8n && chmod 755 /app/.n8n
 
 # Expose port
 EXPOSE ${PORT:-5678}
@@ -39,6 +39,5 @@ EXPOSE ${PORT:-5678}
 HEALTHCHECK --interval=30s --timeout=10s --start-period=120s --retries=3 \
   CMD curl -f http://localhost:${PORT:-5678}/healthz || exit 1
 
-# Start command
-ENTRYPOINT ["tini", "--"]
-CMD ["/docker-entrypoint.sh", "n8n"]
+# Start command without user switching
+CMD ["n8n", "start"]
