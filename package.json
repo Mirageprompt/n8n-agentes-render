@@ -1,0 +1,11 @@
+{
+  "name": "n8n-agentes-render",
+  "version": "1.0.0",
+  "description": "N8N para Agentes IA - Render Deploy",
+  "scripts": {
+    "start": "n8n start"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
